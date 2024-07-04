@@ -12,8 +12,8 @@ const CardImage = ({ image }) => {
     >
       <Image
         source={{
-          uri: image.src.small
-            ? image.src.small
+          uri: image.src.portrait
+            ? image.src.portrait
             : "https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg"
         }}
         style={{ height: 180, borderRadius: 5 }}

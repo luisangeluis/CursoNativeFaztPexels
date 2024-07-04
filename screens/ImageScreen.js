@@ -1,9 +1,17 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Avatar } from '@rneui/themed';
+import { Button } from '@rneui/base';
+import * as WebBrowser from 'expo-web-browser';
+
 
 const ImageScreen = ({ route }) => {
   const { image } = route.params;
+
+  const handlePress=async()=>{
+    console.log(image.photographer_url)
+    await WebBrowser.openBrowserAsync(image.photographer_url);
+  };
   return (
     <View style={styles.headerPhotographer}>
       <Image source={{ uri: image.src.medium }} style={{ height: 350 }} />
@@ -25,13 +33,16 @@ const ImageScreen = ({ route }) => {
               .join("")
               .toUpperCase()
             }
-            containerStyle={{ backgroundColor: "red" }} rounded
+            containerStyle={{ backgroundColor: "red" }} 
+            rounded
           />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handlePress}>
             <Text style={styles.textPhotographer}>{image.photographer}</Text>
           </TouchableOpacity>
         </View>
+        <Button title={"Download"} buttonStyle={{backgroundColor:"#229783"}}/>
       </View>
+      <View></View>
     </View>
   )
 }
