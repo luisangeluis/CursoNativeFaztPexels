@@ -1,20 +1,62 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Avatar } from '@rneui/themed';
-import { Button } from '@rneui/base';
+import { Button } from '@rneui/themed';
+
 import * as WebBrowser from 'expo-web-browser';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+
+
+import ImageList from '../components/ImageList';
+import { getImages } from '../api/pexels';
 
 
 const ImageScreen = ({ route }) => {
   const { image } = route.params;
+  const [photos, setPhotos] = useState();
 
-  const handlePress=async()=>{
-    console.log(image.photographer_url)
-    await WebBrowser.openBrowserAsync(image.photographer_url);
-  };
+  const loadImages = async () => {
+    const res = await getImages();
+    setPhotos(res.data.photos);
+  }
+
+
+  useEffect(() => {
+    loadImages();
+  }, [])
+
+  const handlePress=async()=> await WebBrowser.openBrowserAsync(image.photographer_url);
+
+  const downloadFile=async()=>{
+    try{
+      let fileUri = FileSystem.documentDirectory + image.id + ".jpeg";
+      const {uri} = await FileSystem.downloadAsync(image.src.portrait,fileUri);
+      console.log({uri});
+      saveFile(uri);
+    }catch(error){
+      console.log(error);
+    }
+    
+  }
+
+  const saveFile=async(fileUri)=>{
+    const {status}=await MediaLibrary.requestPermissionsAsync();
+
+    if(status === "granted"){
+      const asset = await MediaLibrary.createAssetAsync(fileUri);
+      await MediaLibrary.createAlbumAsync("Download",asset,false);
+    }
+  }
+
+  const handleDownload=async()=>{
+    console.log("download");
+    downloadFile();
+  }
+  
   return (
     <View style={styles.headerPhotographer}>
-      <Image source={{ uri: image.src.medium }} style={{ height: 350 }} />
+      <Image source={{ uri: image.src.large2x }} style={{ height: 350 }} />
       <View
         style={{
           display: "flex",
@@ -40,9 +82,16 @@ const ImageScreen = ({ route }) => {
             <Text style={styles.textPhotographer}>{image.photographer}</Text>
           </TouchableOpacity>
         </View>
-        <Button title={"Download"} buttonStyle={{backgroundColor:"#229783"}}/>
+        <Button 
+          title={"Download"} 
+          buttonStyle={{backgroundColor:"#229783"}} 
+          // onPress={()=>handleDownload}
+          onPress={handleDownload}
+        />
       </View>
-      <View></View>
+      <View>
+        <ImageList photos={photos}/>
+      </View>
     </View>
   )
 }
